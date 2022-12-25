@@ -70,7 +70,6 @@ class Program_handler:
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				self.process_mouse_inputs()
 
-
 			elif event.type == pygame.KEYDOWN:
 				self.process_keyboard_inputs(event)
 
@@ -90,13 +89,7 @@ class Program_handler:
 	def process_mouse_inputs(self):
 		mouse_position = pygame.mouse.get_pos()
 		if self.reset_button.clicked_check(mouse_position):
-			self.rubiks_cube_player.reset_waiting = True
-			self.algorithm_helper.reset()
-			self.info_window.reset()
-			self.timer.reset()
-			self.net_inserter = Net_inserter(1385, 450, 40, 1400, 820, net_scale=30)
-			self.insert_own_button.keep_pressed = False
-			self.insert_own_button.text = "INSERT OWN"
+			self.reset()
 
 		elif self.cross_practice_button.clicked_check(mouse_position):
 			self.rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.CROSS)
@@ -157,6 +150,15 @@ class Program_handler:
 		self.info_window.clicked_check(mouse_position)
 		self.net_inserter.color_input(mouse_position)
 		self.net_inserter.box_clicked(mouse_position)
+
+	def reset(self):
+		self.rubiks_cube_player.reset_waiting = True
+		self.algorithm_helper.reset()
+		self.info_window.reset()
+		self.timer.reset()
+		self.net_inserter = Net_inserter(1385, 450, 40, 1400, 820, net_scale=30)
+		self.insert_own_button.keep_pressed = False
+		self.insert_own_button.text = "INSERT OWN"
 
 	def draw(self):
 		self.rubiks_cube_player.draw(self.screen, scale, cube_position)
