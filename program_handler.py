@@ -134,15 +134,11 @@ class Program_handler:
 		
 		if self.confirm_insert_button.clicked_check(mouse_position):
 			if self.net_inserter.check_validity() and not self.rubiks_cube_player.shuffled:
+				self.reset()
+
 				self.rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.NOTHING)
 				self.rubiks_cube_player.insert_own_net(self.net_inserter.net)
 				self.rubiks_cube_player.shuffled = True
-				self.net_inserter.reset()
-				self.insert_own_button.keep_pressed = False
-				self.insert_own_button.text = "INSERT OWN"
-				self.algorithm_helper.reset()
-				self.info_window.reset()
-
 			else:
 				self.net_inserter.show_invalid_state()
 			
@@ -156,7 +152,7 @@ class Program_handler:
 		self.algorithm_helper.reset()
 		self.info_window.reset()
 		self.timer.reset()
-		self.net_inserter = Net_inserter(1385, 450, 40, 1400, 820, net_scale=30)
+		self.net_inserter.reset()
 		self.insert_own_button.keep_pressed = False
 		self.insert_own_button.text = "INSERT OWN"
 
