@@ -14,6 +14,9 @@ from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corn
 from event_handler import Event_Handler
 from rubiks_cube_states import Rubiks_cube_states
 from move_creator import Move_creator
+from help_for_oll import Helper_for_oll
+from advice import Advice
+
 
 from project_settings import speed, shift, net_scale, scale, net_x, net_y, fps, cube_position, window_width, window_height, window_caption
 
@@ -191,32 +194,34 @@ class Program_handler:
 
 		if not self.rubiks_cube_player.shuffled:
 			self.insert_own_button.draw(self.screen)
-	
+
+	def parts_solved_info_things(self):
+		if self.rubiks_cube_player.net.solved_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
+			self.parts_solved_info.pll_solved(str(self.timer))
+
+		elif self.rubiks_cube_player.net.oll_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
+			self.parts_solved_info.oll_solved(str(self.timer))
+
+		elif self.rubiks_cube_player.net.second_layer_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
+			self.parts_solved_info.first_two_layers_solved(str(self.timer))
+
+		elif self.rubiks_cube_player.net.first_layer_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
+			self.parts_solved_info.first_layer_solved(str(self.timer))
+
+		elif self.rubiks_cube_player.net.white_cross_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
+			self.parts_solved_info.cross_solved(str(self.timer))
+
+	def reset_screen(self):
+		self.screen.fill(grey)
 
 	def work(self):
 		while self.run:
 			self.clock.tick(fps)
-			self.screen.fill(grey)
+			self.reset_screen()
 
 			self.check_inputs()
-
-
-			if self.rubiks_cube_player.net.solved_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
-				self.parts_solved_info.pll_solved(str(self.timer))
-
-			elif self.rubiks_cube_player.net.oll_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
-				self.parts_solved_info.oll_solved(str(self.timer))
-
-			elif self.rubiks_cube_player.net.second_layer_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
-				self.parts_solved_info.first_two_layers_solved(str(self.timer))
-
-			elif self.rubiks_cube_player.net.first_layer_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
-				self.parts_solved_info.first_layer_solved(str(self.timer))
-
-			elif self.rubiks_cube_player.net.white_cross_check() and self.rubiks_cube_player.shuffled and not self.rubiks_cube_player.scrambling:
-				self.parts_solved_info.cross_solved(str(self.timer))
-
-						
+			self.parts_solved_info_things()
+				
 			#CUBE THINGS
 			if self.rubiks_cube_player.reset_waiting and not self.rubiks_cube_player.move_in_progress:
 				self.rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y)
@@ -280,46 +285,18 @@ class Program_handler:
 
 			elif self.rubiks_cube_player.mode == Rubiks_cube_states.OLL and not self.rubiks_cube_player.scrambling:
 				if not (self.algorithm_helper.moves or self.rubiks_cube_player.moves_buffer):
-					help_for_oll = self.rubiks_cube_player.net.mode_four_hinter_edges()
-					if help_for_oll[0] == 4:
-						self.info_window.text = "DO EDGE ROTATE ALGORITHM"
-						self.algorithm_helper.algorithm = rotate_edges_alg
+					wrongly_flipped_edges = self.rubiks_cube_player.net.mode_four_hinter_edges()
+					wrongly_flipped_corners = self.rubiks_cube_player.net.mode_four_hinter_corners()
+					helper_for_oll = Helper_for_oll(wrongly_flipped_edges, wrongly_flipped_corners)
+					advice = helper_for_oll.get_advice()
 
-					elif help_for_oll[0] == 2:
-						if help_for_oll[2] == "line":
-							if help_for_oll[3] == "right":
-								self.algorithm_helper.ingore_u = False
-								self.info_window.text = "DO EDGE ROTATE ALGORITHM"
-								self.algorithm_helper.algorithm = rotate_edges_alg
+					self.algorithm_helper.ingore_u = advice.ignore_u
+					self.info_window.text = advice.message
+					self.algorithm_helper.algorithm = advice.alg
 
-							elif help_for_oll[3] == "wrong":
-								self.info_window.text = "ROTATE LINE TO RIGHT POSITION"
-								self.algorithm_helper.ingore_u = True
-
-						elif help_for_oll[2] == "l-shape":
-							if "front" in help_for_oll[1] and "right" in help_for_oll[1]:
-								self.algorithm_helper.ingore_u = False
-								self.info_window.text = "DO EDGE ROTATE ALGORITHM"
-								self.algorithm_helper.algorithm = rotate_edges_alg
-
-							else:
-								self.info_window.text = "ROTATE L-SHAPE TO RIGHT POSITION"
-								self.algorithm_helper.ingore_u = True
-
-					elif help_for_oll[0] == 0:
-						oll_corners_hint = self.rubiks_cube_player.net.mode_four_hinter_corners()
-						if oll_corners_hint[0] == 0:
-							self.info_window.text = "OLL SOLVED. CONGRATULATION"
-							self.rubiks_cube_player.user_moves_blocked = True
-
-						else:
-							if "4" in oll_corners_hint[1]:
-								self.info_window.text = "DO CORNER ROTATE ALG UNTIL IT IS SOLVED"
-								self.algorithm_helper.algorithm = copy.deepcopy(rotate_corner_alg)
-								self.algorithm_helper.ingore_u = False
-							else:
-								self.info_window.text = "ROTATE ANOTHER CORNER TO RIGHT SPOT"
-								self.algorithm_helper.ingore_u = True
+					if(advice.done == True):
+						self.rubiks_cube_player.user_moves_blocked = True
+					
 
 			elif self.rubiks_cube_player.mode == Rubiks_cube_states.CROSS and not self.rubiks_cube_player.scrambling:
 				if not self.rubiks_cube_player.moves_buffer and self.rubiks_cube_player.net.white_cross_check():

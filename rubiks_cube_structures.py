@@ -99,21 +99,7 @@ class Rubiks_cube_net:
         if self.faces[5][4] == "black":
             wrongly_flipped_edges.append("front")
 
-        if len(wrongly_flipped_edges) == 4:
-            return (4, wrongly_flipped_edges, None)
-
-        elif len(wrongly_flipped_edges) == 0:
-            return (0, None, None)
-
-        elif len(wrongly_flipped_edges) == 2:
-            if "front" in wrongly_flipped_edges and "back" in wrongly_flipped_edges:
-                return (2, wrongly_flipped_edges, "line", "right")
-
-            elif "left" in wrongly_flipped_edges and "right" in wrongly_flipped_edges:
-                return (2, wrongly_flipped_edges, "line", "wrong")
-
-            else:
-                return (2, wrongly_flipped_edges, "l-shape")
+        return wrongly_flipped_edges
 
     def mode_four_hinter_corners(self) -> list:
         corners = []
@@ -126,8 +112,7 @@ class Rubiks_cube_net:
         if self.faces[5][3] != "yellow":
             corners.append("4")
 
-
-        return (len(corners), corners)
+        return corners
 
     def mode_five_hinter(self) -> list:     
         #CORNERS
