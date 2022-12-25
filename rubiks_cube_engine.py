@@ -11,6 +11,8 @@ from colors import white, red, yellow, orange, green, blue, grey, black, lime, b
 from utilities import Timer, Button, Net_inserter, Algorithm_helper, Info_window, Parts_solved
 from keyboard_press_translator import keyboard_press_translator
 from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corner_alg
+from event_handler import Event_Handler
+from rubiks_cube_states import Rubiks_cube_states
 
 from project_settings import speed, shift, net_scale, scale, net_x, net_y, fps, cube_position, window_width, window_height, window_caption
 
@@ -22,8 +24,8 @@ pygame.display.set_caption(window_caption)
 screen = pygame.display.set_mode((window_width, window_height))
 clock = pygame.time.Clock()
 
-
 if __name__ == "__main__":
+
     #RUBIKS CUBE
     rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y)
 
@@ -44,6 +46,9 @@ if __name__ == "__main__":
 
     #INSERTER
     net_inserter = Net_inserter(1385, 450, 40, 1400, 820, net_scale=30)
+
+	#EVENT HANDLER
+    event_handler = Event_Handler()
 
     keep_inserter_shown: bool = False
 
@@ -74,25 +79,25 @@ if __name__ == "__main__":
                     insert_own_button.text = "INSERT OWN"
 
                 elif cross_practice_button.clicked_check(mouse_position):
-                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=1)
+                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.CROSS)
                     insert_own_button.keep_pressed = False
 
                 elif first_layer_practice_button.clicked_check(mouse_position):
-                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=2)
+                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.FIRST_LAYER)
                     insert_own_button.keep_pressed = False
 
                 elif second_layer_practice_button.clicked_check(mouse_position):
-                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=3)
+                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.SECOND_LAYER)
                     insert_own_button.keep_pressed = False
 
                 elif oll_practice_button.clicked_check(mouse_position):
-                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=4)
+                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.OLL)
                     algorithm_helper.reset()
                     info_window.reset()
                     insert_own_button.keep_pressed = False
 
                 elif pll_practice_button.clicked_check(mouse_position):
-                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=5)
+                    rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.PLL)
                     algorithm_helper.reset()
                     info_window.reset()
                     insert_own_button.keep_pressed = False
@@ -116,7 +121,7 @@ if __name__ == "__main__":
                 
                 if confirm_insert_button.clicked_check(mouse_position):
                     if net_inserter.check_validity() and not rubiks_cube_player.shuffled:
-                        rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=0)
+                        rubiks_cube_player = Rubiks_cube(shift, net_scale, net_x, net_y, mode=Rubiks_cube_states.NOTHING)
                         rubiks_cube_player.insert_own_net(net_inserter.net)
                         rubiks_cube_player.shuffled = True
                         net_inserter.reset()
@@ -144,7 +149,7 @@ if __name__ == "__main__":
                             rubiks_cube_player.add_move(f"{new_move}’")
 
 
-                            if not algorithm_helper.locked and rubiks_cube_player.mode != 0:
+                            if not algorithm_helper.locked and rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
                                 algorithm_helper.add_move(f"{new_move}’")
 
                         except KeyError:
@@ -155,7 +160,7 @@ if __name__ == "__main__":
                             new_move = keyboard_press_translator[event.key]
                             rubiks_cube_player.add_move(f"{new_move}2")
 
-                            if not algorithm_helper.locked and rubiks_cube_player.mode != 0:
+                            if not algorithm_helper.locked and rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
                                 algorithm_helper.add_move(f"{new_move}2")
 
                         except KeyError:
@@ -166,12 +171,12 @@ if __name__ == "__main__":
                             new_move = keyboard_press_translator[event.key]
                             rubiks_cube_player.add_move(new_move)
 
-                            if not algorithm_helper.locked and rubiks_cube_player.mode != 0:
+                            if not algorithm_helper.locked and rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
                                 algorithm_helper.add_move(new_move)
                         except KeyError:
                             pass
 
-                    if rubiks_cube_player.mode == 0 and rubiks_cube_player.shuffled:
+                    if rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and rubiks_cube_player.shuffled:
                         timer.start()
 
 
@@ -212,7 +217,7 @@ if __name__ == "__main__":
             confirm_insert_button.draw(screen)
 
         #INFO WINDOW
-        if rubiks_cube_player.mode == 5 and not rubiks_cube_player.scrambling:
+        if rubiks_cube_player.mode == Rubiks_cube_states.PLL and not rubiks_cube_player.scrambling:
             #CORNERS
             if not (algorithm_helper.moves or rubiks_cube_player.moves_buffer):
                 help_for_pll = rubiks_cube_player.net.mode_five_hinter()
@@ -255,7 +260,7 @@ if __name__ == "__main__":
                             info_window.text = "DO EDGE SWITCH ALGORITHM"
                             algorithm_helper.algorithm = swap_edges_alg
 
-        elif rubiks_cube_player.mode == 4 and not rubiks_cube_player.scrambling:
+        elif rubiks_cube_player.mode == Rubiks_cube_states.OLL and not rubiks_cube_player.scrambling:
             if not (algorithm_helper.moves or rubiks_cube_player.moves_buffer):
                 help_for_oll = rubiks_cube_player.net.mode_four_hinter_edges()
                 if help_for_oll[0] == 4:
@@ -298,17 +303,17 @@ if __name__ == "__main__":
                             info_window.text = "ROTATE ANOTHER CORNER TO RIGHT SPOT"
                             algorithm_helper.ingore_u = True
 
-        elif rubiks_cube_player.mode == 1 and not rubiks_cube_player.scrambling:
+        elif rubiks_cube_player.mode == Rubiks_cube_states.CROSS and not rubiks_cube_player.scrambling:
             if not rubiks_cube_player.moves_buffer and rubiks_cube_player.net.white_cross_check():
                 info_window.text = "DONE. CONGRATULATION"
                 rubiks_cube_player.user_moves_blocked = True
 
-        elif rubiks_cube_player.mode == 2 and not rubiks_cube_player.scrambling:
+        elif rubiks_cube_player.mode == Rubiks_cube_states.FIRST_LAYER and not rubiks_cube_player.scrambling:
             if not rubiks_cube_player.moves_buffer and rubiks_cube_player.net.white_cross_check() and rubiks_cube_player.net.first_layer_check():
                 info_window.text = "DONE. CONGRATULATION"
                 rubiks_cube_player.user_moves_blocked = True
 
-        elif rubiks_cube_player.mode == 3 and not rubiks_cube_player.scrambling:
+        elif rubiks_cube_player.mode == Rubiks_cube_states.SECOND_LAYER and not rubiks_cube_player.scrambling:
             if not rubiks_cube_player.moves_buffer and rubiks_cube_player.net.white_cross_check() and rubiks_cube_player.net.first_layer_check() and rubiks_cube_player.net.second_layer_check():
                 info_window.text = "DONE. CONGRATULATION"
                 rubiks_cube_player.user_moves_blocked = True
@@ -317,13 +322,13 @@ if __name__ == "__main__":
         #ALGORITHM HELPER
         algorithm_helper.alg_done_check()
 
-        if rubiks_cube_player.mode in (4, 5):
+        if rubiks_cube_player.mode == Rubiks_cube_states.OLL or rubiks_cube_player.mode == Rubiks_cube_states.PLL:
             algorithm_helper.draw(screen)
 
-        if rubiks_cube_player.mode in (1, 2, 3, 4, 5):
+        if rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
             info_window.draw(screen)
 
-        if rubiks_cube_player.shuffled and rubiks_cube_player.mode == 0:
+        if rubiks_cube_player.shuffled and rubiks_cube_player.mode == Rubiks_cube_states.NOTHING:
             parts_solved_info.draw(screen)
 
         #DRAW
@@ -340,7 +345,7 @@ if __name__ == "__main__":
         if not rubiks_cube_player.shuffled:
             insert_own_button.draw(screen)
 
-        if rubiks_cube_player.mode == 0 and rubiks_cube_player.shuffled:
+        if rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and rubiks_cube_player.shuffled:
             timer.draw(screen)
         
         pygame.display.update()

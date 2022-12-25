@@ -12,6 +12,7 @@ from rubiks_cube_nets import solved_cube_net, cross_on_yellow_net, cross_on_whit
 from algs import pll_algs, sexy_move, oll_corners_algs, rotate_edges_alg, insert_edge_alg, swap_corners_alg
 from itertools import permutations
 from opposite_move import opposite_moves
+from rubiks_cube_states import Rubiks_cube_states
 
 
 class Square_on_cube:
@@ -739,7 +740,7 @@ class Cube:
 
 class Rubiks_cube: 
 
-    def __init__(self, shift: float, net_scale: int, net_x: int, net_y: int, mode:int = 0, user_moves_blocked=True) -> None:
+    def __init__(self, shift: float, net_scale: int, net_x: int, net_y: int, mode:Rubiks_cube_states = Rubiks_cube_states.NOTHING, user_moves_blocked=True) -> None:
         if not isinstance(shift, (int, float)):
             raise TypeError(f"ERROR: variable shift can be int or float -> {shift}")
         if not isinstance(net_x, int):
@@ -748,8 +749,8 @@ class Rubiks_cube:
             raise TypeError(f"ERROR: variable net_y has to be int -> {net_y}")
         if not isinstance(net_scale, int):
             raise TypeError(f"ERROR: variable net_scale has to be int -> {net_scale}")
-        if not isinstance(mode, int) and mode is not None :
-            raise TypeError(f"ERROR: variable mode has to be int -> {mode}")
+        if not isinstance(mode, Rubiks_cube_states):
+            raise TypeError(f"ERROR: variable mode has to be Rubiks_cube_states -> {mode}")
 
         if shift < 0:
             raise ValueError(f"ERROR: variable shift has to be a positive number -> {shift}")
@@ -778,27 +779,27 @@ class Rubiks_cube:
 
         self.scrambling: bool = False
 
-        self.mode: int = mode
+        self.mode: Rubiks_cube_states = mode
         self.shuffled: bool = False
 
-        if not mode:
+        if self.mode == Rubiks_cube_states.NOTHING:
             net = solved_cube_net
-        elif mode == 1:
+        elif mode == Rubiks_cube_states.CROSS:
             net = cross_on_white_net
             self.new_scramble()
-        elif mode == 2:
+        elif mode == Rubiks_cube_states.FIRST_LAYER:
             net = corners_solved_net
             self.scramble_first_layer()
 
-        elif mode == 3:
+        elif mode == Rubiks_cube_states.SECOND_LAYER:
             net = first_two_layers_solved_net
             self.scramble_second_layer()
         
-        elif mode == 4:
+        elif mode == Rubiks_cube_states.OLL:
             net = oll_solved_net
             self.make_random_oll()
 
-        elif mode == 5:
+        elif mode == Rubiks_cube_states.PLL:
             net = solved_cube_net
             self.make_random_pll()
     
