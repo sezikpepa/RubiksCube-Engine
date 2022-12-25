@@ -15,6 +15,7 @@ from event_handler import Event_Handler
 from rubiks_cube_states import Rubiks_cube_states
 from move_creator import Move_creator
 from help_for_oll import Helper_for_oll
+from help_for_pll import Helper_for_pll
 from advice import Advice
 
 
@@ -243,45 +244,19 @@ class Program_handler:
 			if self.rubiks_cube_player.mode == Rubiks_cube_states.PLL and not self.rubiks_cube_player.scrambling:
 				#CORNERS
 				if not (self.algorithm_helper.moves or self.rubiks_cube_player.moves_buffer):
-					help_for_pll = self.rubiks_cube_player.net.mode_five_hinter()
-					if help_for_pll:
-						if help_for_pll[0] == 1:
-							if help_for_pll[1] != "back":
-								self.info_window.text = "ROTATE ADJACENT CORNERS TO BACK"
-								self.algorithm_helper.ingore_u = True
-							else:
-								self.algorithm_helper.ingore_u = False
-								self.info_window.text = "DO ALGORITHM TO SWAP CORNERS"
-								self.algorithm_helper.algorithm = swap_corners_alg
+					adjacent_corners_positions = self.rubiks_cube_player.net.mode_five_hinter_corners()
+					line_positions = self.rubiks_cube_player.net.mode_five_hinter_edges()
+					pll_helper = Helper_for_pll(adjacent_corners_positions, line_positions)
+					advice = pll_helper.get_advice()
 
+					self.algorithm_helper.ingore_u = advice.ignore_u
+					self.info_window.text = advice.message
+					self.algorithm_helper.algorithm = advice.alg
 
-						elif help_for_pll[0] == 0:
-							self.algorithm_helper.ingore_u = False
-							self.info_window.text = "DO ALGORITHM TO SWAP CORNERS"
-							self.algorithm_helper.algorithm = swap_corners_alg
+					if(advice.done == True):
+						self.rubiks_cube_player.user_moves_blocked = True
 
-						else:
-							#EDGES
-							if len(help_for_pll[2]) == 1:
-								if help_for_pll[2][0] != "front":
-									self.info_window.text = "ROTATE STRIP TO FRONT"
-									self.algorithm_helper.ingore_u = True
-								else:
-									self.algorithm_helper.ingore_u = False
-									self.info_window.text = "DO EDGE SWITCH ALGORITHM"
-									self.algorithm_helper.algorithm = swap_edges_alg
-
-							elif len(help_for_pll[2]) == 4:
-								if self.rubiks_cube_player.net.solved_check():
-									self.info_window.text = "SOLVED. GONGRATULATION"
-									self.rubiks_cube_player.user_moves_blocked = True
-								else:
-									self.algorithm_helper.ingore_u = True
-									self.info_window.text = "ALIGN LAST LAYER"
-							else:
-								self.algorithm_helper.ingore_u = False
-								self.info_window.text = "DO EDGE SWITCH ALGORITHM"
-								self.algorithm_helper.algorithm = swap_edges_alg
+					
 
 			elif self.rubiks_cube_player.mode == Rubiks_cube_states.OLL and not self.rubiks_cube_player.scrambling:
 				if not (self.algorithm_helper.moves or self.rubiks_cube_player.moves_buffer):

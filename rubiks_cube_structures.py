@@ -114,46 +114,40 @@ class Rubiks_cube_net:
 
         return corners
 
-    def mode_five_hinter(self) -> list:     
-        #CORNERS
-        number_of_adjacent_corners = 0              
-        for_return = []
-        adjacent_corners_position = ""
-        edges = []
+    def mode_five_hinter_edges(self) -> list:
+        position_of_lines = []
+
+        if self.faces[6][3] == self.faces[6][4] == self.faces[6][5]:
+            position_of_lines.append("front")
+
+        if self.faces[3][2] == self.faces[3][2] == self.faces[5][2]:
+            position_of_lines.append("left")
+
+        if self.faces[2][3] == self.faces[2][4] == self.faces[2][5]:
+            position_of_lines.append("back")
+
+        if self.faces[3][6] == self.faces[4][6] == self.faces[5][6]:
+            position_of_lines.append("right")
+
+        return position_of_lines
+
+    def mode_five_hinter_corners(self) -> list:                 
+        adjacent_corners_positions = []
 
         if self.faces[6][3] == self.faces[6][5]:
-            number_of_adjacent_corners += 1
-            adjacent_corners_position = "front"
-            if self.faces[6][3] == self.faces[6][4]:
-                edges.append("front")
+            adjacent_corners_positions.append("front")
 
         if self.faces[3][2] == self.faces[5][2]:
-            number_of_adjacent_corners += 1
-            adjacent_corners_position = "left"
-            if self.faces[4][2] == self.faces[3][2]:
-                edges.append("left")
+            adjacent_corners_positions.append("left")
 
         if self.faces[2][3] == self.faces[2][5]:
-            number_of_adjacent_corners += 1
-            adjacent_corners_position = "back"
-            if self.faces[2][3] == self.faces[2][4]:
-                edges.append("back")
+            adjacent_corners_positions.append("back")
 
         if self.faces[3][6] == self.faces[5][6]:
-            number_of_adjacent_corners += 1
-            adjacent_corners_position = "right"
-            if self.faces[3][6] == self.faces[4][6]:
-                edges.append("right")
+            adjacent_corners_positions.append("right")
 
-        #EDGES
+        return adjacent_corners_positions
 
-
-        if number_of_adjacent_corners == 1:
-            return [1, adjacent_corners_position, edges]
-        if number_of_adjacent_corners == 0:
-            return [0, None, edges]
-        if number_of_adjacent_corners == 4:
-            return [4, None, edges]
 
     def extract_centres(self) -> list:
         centers = [[self.faces[1][4]], [self.faces[4][1]], [self.faces[4][4]], [self.faces[4][7]], [self.faces[7][4]], [self.faces[10][4]]]
@@ -549,7 +543,7 @@ class Rubiks_cube_net:
     def first_layer_check(self) -> bool:
         for x in range(3, 6):
             for y in range(9, 12):
-                if self.faces[y][3] != "white":
+                if self.faces[y][3] != "white":   #bug asi
                     return False
 
         if not(self.faces[8][3] == self.faces[8][4] == self.faces[8][5] == self.faces[7][4]):
