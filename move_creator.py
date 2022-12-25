@@ -39,3 +39,30 @@ class Move_creator:
 	def get_double_move(self, move):
 		return f"{move}2"
 
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+import unittest
+
+class TestStringMethods(unittest.TestCase):
+	def test_get_counter_clockwise_move(self):
+		move_creator = Move_creator()
+		result = move_creator.get_counter_clockwise_move("f")
+		self.assertEqual("f’", result)     
+
+	def test_get_double_move(self):
+		move_creator = Move_creator()
+		result = move_creator.get_double_move("f")
+		self.assertEqual("f2", result)
+
+	#TODO
+	#def test_get_move(self):
+		#move_creator = Move_creator()
+		#result = move_creator.get_move(4096, 192, 3)
+		#self.assertEqual("f’", result)   
+        
+
+if __name__ == '__main__':
+    unittest.main()
+

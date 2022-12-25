@@ -76,6 +76,7 @@ class Program_handler:
 
 	def process_keyboard_inputs(self, event):
 		if not self.rubiks_cube_player.user_moves_blocked:
+			print(pygame.key.get_mods(), pygame.KMOD_CTRL, pygame.KMOD_SHIFT)
 			try:
 				move = self.move_creator.get_move(event, pygame.key.get_mods(), pygame.KMOD_CTRL, pygame.KMOD_SHIFT)
 			except KeyError:
