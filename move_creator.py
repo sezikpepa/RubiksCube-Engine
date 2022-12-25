@@ -13,14 +13,29 @@ from keyboard_press_translator import keyboard_press_translator
 from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corner_alg
 from event_handler import Event_Handler
 from rubiks_cube_states import Rubiks_cube_states
-from program_handler import Program_handler
-from move_creator import Move_creator
+
 
 from project_settings import speed, shift, net_scale, scale, net_x, net_y, fps, cube_position, window_width, window_height, window_caption
 
-#SETTINGS
-#os.environ["SDL_VIDEO_CENTERED"] = '1'
 
-if __name__ == "__main__":
-	program = Program_handler()
-	program.work()
+
+class Move_creator:
+	def __init__(self) -> None:
+		pass
+
+	def get_move(self, event, mods, ctrl, shift):
+		basic_move = keyboard_press_translator[event.key]
+		if mods & ctrl:
+			return self.get_counter_clockwise_move(basic_move)
+
+		if mods & shift:
+			return self.get_double_move(basic_move)
+
+		return basic_move
+
+	def get_counter_clockwise_move(self, move):
+		return f"{move}’"
+
+	def get_double_move(self, move):
+		return f"{move}2"
+

@@ -13,7 +13,7 @@ from keyboard_press_translator import keyboard_press_translator
 from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corner_alg
 from event_handler import Event_Handler
 from rubiks_cube_states import Rubiks_cube_states
-
+from move_creator import Move_creator
 
 from project_settings import speed, shift, net_scale, scale, net_x, net_y, fps, cube_position, window_width, window_height, window_caption
 
@@ -44,6 +44,9 @@ class Program_handler:
 		#TIMER
 		self.timer = Timer(1300, 150)
 
+		#MOVE CREATOR
+		self.move_creator = Move_creator()
+
 		#INSERTER
 		self.net_inserter = Net_inserter(1385, 450, 40, 1400, 820, net_scale=30)
 
@@ -72,44 +75,15 @@ class Program_handler:
 				self.process_keyboard_inputs(event)
 
 	def process_keyboard_inputs(self, event):
-		keys = pygame.key.get_pressed()
-
 		if not self.rubiks_cube_player.user_moves_blocked:
-			if pygame.key.get_mods() & pygame.KMOD_CTRL:
-				try:
-					new_move = keyboard_press_translator[event.key]
-					self.rubiks_cube_player.add_move(f"{new_move}’")
+			try:
+				move = self.move_creator.get_move(event, pygame.key.get_mods(), pygame.KMOD_CTRL, pygame.KMOD_SHIFT)
+			except KeyError:
+				return
 
-
-					if not self.algorithm_helper.locked and self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
-						self.algorithm_helper.add_move(f"{new_move}’")
-
-				except KeyError:
-					pass
-
-			elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
-				try:
-					new_move = keyboard_press_translator[event.key]
-					self.rubiks_cube_player.add_move(f"{new_move}2")
-
-					if not self.algorithm_helper.locked and self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
-						self.algorithm_helper.add_move(f"{new_move}2")
-
-				except KeyError:
-					pass
-
-			else:
-				try:
-					new_move = keyboard_press_translator[event.key]
-					self.rubiks_cube_player.add_move(new_move)
-
-					if not self.algorithm_helper.locked and self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
-						self.algorithm_helper.add_move(new_move)
-				except KeyError:
-					pass
-
-			if self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and self.rubiks_cube_player.shuffled:
-				self.timer.start()
+			self.rubiks_cube_player.add_move(move)
+			if not self.algorithm_helper.locked and self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
+				self.algorithm_helper.add_move(move)
 
 
 	def process_mouse_inputs(self):
@@ -182,6 +156,42 @@ class Program_handler:
 		self.info_window.clicked_check(mouse_position)
 		self.net_inserter.color_input(mouse_position)
 		self.net_inserter.box_clicked(mouse_position)
+
+	def draw(self):
+		self.rubiks_cube_player.draw(self.screen, scale, cube_position)
+
+		if self.insert_own_button.keep_pressed:
+			self.net_inserter.draw(self.screen)
+			self.confirm_insert_button.draw(self.screen)
+
+		if self.rubiks_cube_player.mode == Rubiks_cube_states.OLL or self.rubiks_cube_player.mode == Rubiks_cube_states.PLL:
+			self.algorithm_helper.draw(self.screen)
+
+		if self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
+			self.info_window.draw(self.screen)
+
+		if self.rubiks_cube_player.shuffled and self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING:
+			self.parts_solved_info.draw(self.screen)
+		
+		if self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and self.rubiks_cube_player.shuffled:
+			self.timer.draw(self.screen)
+
+		self.draw_buttons()
+
+		pygame.display.update()
+
+
+	def draw_buttons(self):
+		self.reset_button.draw(self.screen)
+		self.cross_practice_button.draw(self.screen)
+		self.shuffle_button.draw(self.screen)
+		self.first_layer_practice_button.draw(self.screen)
+		self.second_layer_practice_button.draw(self.screen)
+		self.oll_practice_button.draw(self.screen)
+		self.pll_practice_button.draw(self.screen)
+
+		if not self.rubiks_cube_player.shuffled:
+			self.insert_own_button.draw(self.screen)
 	
 
 	def work(self):
@@ -222,11 +232,8 @@ class Program_handler:
 				self.timer.stop()
 				self.rubiks_cube_player.user_moves_blocked = True
 
-
-			#INSERTER
-			if self.insert_own_button.keep_pressed:
-				self.net_inserter.draw(self.screen)
-				self.confirm_insert_button.draw(self.screen)
+			if self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and self.rubiks_cube_player.shuffled:
+				self.timer.start()
 
 			#INFO WINDOW
 			if self.rubiks_cube_player.mode == Rubiks_cube_states.PLL and not self.rubiks_cube_player.scrambling:
@@ -334,32 +341,7 @@ class Program_handler:
 			#ALGORITHM HELPER
 			self.algorithm_helper.alg_done_check()
 
-			if self.rubiks_cube_player.mode == Rubiks_cube_states.OLL or self.rubiks_cube_player.mode == Rubiks_cube_states.PLL:
-				self.algorithm_helper.draw(self.screen)
-
-			if self.rubiks_cube_player.mode != Rubiks_cube_states.NOTHING:
-				self.info_window.draw(self.screen)
-
-			if self.rubiks_cube_player.shuffled and self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING:
-				self.parts_solved_info.draw(self.screen)
-
-			#DRAW
-			self.reset_button.draw(self.screen)
-			self.cross_practice_button.draw(self.screen)
-			self.shuffle_button.draw(self.screen)
-			self.first_layer_practice_button.draw(self.screen)
-			self.second_layer_practice_button.draw(self.screen)
-			self.oll_practice_button.draw(self.screen)
-			self.pll_practice_button.draw(self.screen)
-
-			self.rubiks_cube_player.draw(self.screen, scale, cube_position)
-
-			if not self.rubiks_cube_player.shuffled:
-				self.insert_own_button.draw(self.screen)
-
-			if self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and self.rubiks_cube_player.shuffled:
-				self.timer.draw(self.screen)
+			self.draw()
 			
-			pygame.display.update()
-
+			
 		pygame.quit()
