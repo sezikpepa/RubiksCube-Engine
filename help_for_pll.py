@@ -20,30 +20,38 @@ class Helper_for_pll:
 		self.adjacent_corners_positions = adjacent_corners_position
 		self.line_positions = line_positions
 
+	def no_adjacent_corners(self):
+		return Advice("DO ALGORITHM TO SWAP CORNERS", swap_corners_alg)
+
+	def adjacent_corners(self):
+		if self.adjacent_corners_positions[0] != "back":
+			return Advice("ROTATE ADJACENT CORNERS TO BACK", [], ignore_u=True)
+		else:
+			return Advice("DO ALGORITHM TO SWAP CORNERS", swap_corners_alg)
+
+	def line(self):
+		if len(self.line_positions) == 1:
+			if self.line_positions[0] != "front":
+				return Advice("ROTATE STRIP TO FRONT", [], ignore_u=True)
+
+			return Advice("DO EDGE SWITCH ALGORITHM", swap_edges_alg)
+
+		elif len(self.line_positions) == 4:
+			#todo auf
+			if(True == True):
+				return Advice("SOLVED. GONGRATULATION", [], done=True)
+			else:
+				return Advice("ALIGN LAST LAYER", [], ignore_u=True)
+
+		return Advice("DO EDGE SWITCH ALGORITHM", swap_edges_alg)
+
 	def get_advice(self):
 
 		if len(self.adjacent_corners_positions) == 1:
-			if self.adjacent_corners_positions[0] != "back":
-				return Advice("ROTATE ADJACENT CORNERS TO BACK", [], ignore_u=True)
-			else:
-				return Advice("DO ALGORITHM TO SWAP CORNERS", swap_corners_alg)
+			return self.adjacent_corners()
 
 		elif len(self.adjacent_corners_positions) == 0:
-			return Advice("DO ALGORITHM TO SWAP CORNERS", swap_corners_alg)
+			return self.no_adjacent_corners()
 
 		else:
-			#EDGES
-			if len(self.line_positions) == 1:
-				if self.line_positions[0] != "front":
-					return Advice("ROTATE STRIP TO FRONT", [], ignore_u=True)
-				else:
-					return Advice("DO EDGE SWITCH ALGORITHM", swap_edges_alg)
-
-			elif len(self.line_positions) == 4:
-				#todo auf
-				if(True == True):
-					return Advice("SOLVED. GONGRATULATION", [], done=True)
-				else:
-					return Advice("ALIGN LAST LAYER", [], ignore_u=True)
-			else:
-				return Advice("DO EDGE SWITCH ALGORITHM", swap_edges_alg)
+			return self.line()
