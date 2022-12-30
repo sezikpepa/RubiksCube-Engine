@@ -8,7 +8,6 @@ import time
 
 from rubiks_cube_structures import Square_on_cube, Rubiks_cube_net, Cube, Rubiks_cube
 from colors import white, red, yellow, orange, green, blue, grey, black, lime, bage, tyrkis, violet, pink, dark_green
-from utilities import Timer, Button, Net_inserter, Algorithm_helper, Info_window, Parts_solved
 from keyboard_press_translator import keyboard_press_translator
 from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corner_alg
 from event_handler import Event_Handler
@@ -38,6 +37,21 @@ class Move_creator:
 
 	def get_double_move(self, move):
 		return f"{move}2"
+
+	def get_clockwise_move(self, move):
+		return move[:-1]
+
+	def is_double(self, move): #not tested
+		return move[-1] == "2"
+
+	def is_clockwise(self, move): #not tested
+		return move[-1] != "’"
+
+	def is_counter_clockwise(self, move): #not tested
+		return move[-1] == "’"
+
+	def is_same_face_move(self, move1, move2): #not tested
+		return move1[0] == move2[0]
 
 
 

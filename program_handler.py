@@ -8,7 +8,7 @@ import time
 
 from rubiks_cube_structures import Square_on_cube, Rubiks_cube_net, Cube, Rubiks_cube
 from colors import white, red, yellow, orange, green, blue, grey, black, lime, bage, tyrkis, violet, pink, dark_green
-from utilities import Timer, Button, Net_inserter, Algorithm_helper, Info_window, Parts_solved
+from utilities import Button, Net_inserter, Info_window
 from keyboard_press_translator import keyboard_press_translator
 from algs import swap_corners_alg, swap_edges_alg, rotate_edges_alg, rotate_corner_alg
 from event_handler import Event_Handler
@@ -17,6 +17,9 @@ from move_creator import Move_creator
 from help_for_oll import Helper_for_oll
 from help_for_pll import Helper_for_pll
 from advice import Advice
+from parts_solved import Parts_solved
+from timer import Timer
+from algorithm_helper import Algorithm_helper
 
 
 from project_settings import speed, shift, net_scale, scale, net_x, net_y, fps, cube_position, window_width, window_height, window_caption
@@ -215,6 +218,14 @@ class Program_handler:
 	def reset_screen(self):
 		self.screen.fill(grey)
 
+	def set_things_after_advice(self, advice):
+		self.algorithm_helper.ingore_u = advice.ignore_u
+		self.info_window.text = advice.message
+		self.algorithm_helper.algorithm = advice.alg
+
+		if(advice.done == True):
+			self.rubiks_cube_player.user_moves_blocked = True
+
 	def work(self):
 		while self.run:
 			self.clock.tick(fps)
@@ -234,7 +245,7 @@ class Program_handler:
 
 			
 			if self.rubiks_cube_player.net.solved_check():
-				self.timer.stop()
+				self.timer.stop() #BUG
 				self.rubiks_cube_player.user_moves_blocked = True
 
 			if self.rubiks_cube_player.mode == Rubiks_cube_states.NOTHING and self.rubiks_cube_player.shuffled:
@@ -249,12 +260,7 @@ class Program_handler:
 					pll_helper = Helper_for_pll(adjacent_corners_positions, line_positions)
 					advice = pll_helper.get_advice()
 
-					self.algorithm_helper.ingore_u = advice.ignore_u
-					self.info_window.text = advice.message
-					self.algorithm_helper.algorithm = advice.alg
-
-					if(advice.done == True):
-						self.rubiks_cube_player.user_moves_blocked = True
+					self.set_things_after_advice(advice)
 
 					
 
@@ -265,12 +271,7 @@ class Program_handler:
 					helper_for_oll = Helper_for_oll(wrongly_flipped_edges, wrongly_flipped_corners)
 					advice = helper_for_oll.get_advice()
 
-					self.algorithm_helper.ingore_u = advice.ignore_u
-					self.info_window.text = advice.message
-					self.algorithm_helper.algorithm = advice.alg
-
-					if(advice.done == True):
-						self.rubiks_cube_player.user_moves_blocked = True
+					self.set_things_after_advice(advice)				
 					
 
 			elif self.rubiks_cube_player.mode == Rubiks_cube_states.CROSS and not self.rubiks_cube_player.scrambling:
